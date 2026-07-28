@@ -12,15 +12,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class ConfigManager {
-
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("discordbridgemc.json");
-
     private static Config config;
-
-    private ConfigManager() {
-    }
+    
+    private ConfigManager() {}
 
     public static void load() {
         try {

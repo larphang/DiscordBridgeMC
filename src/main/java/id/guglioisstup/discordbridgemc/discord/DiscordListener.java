@@ -8,7 +8,10 @@ import id.guglioisstup.discordbridgemc.config.ConfigManager;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.dv8tion.jda.api.Permission;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -33,8 +36,11 @@ public class DiscordListener extends ListenerAdapter {
                 int count = DiscordBridgeMC.SERVER.getPlayerList().getPlayerCount();
 
                 String players = DiscordBridgeMC.SERVER.getPlayerList().getPlayers().stream()
-                        .map(player -> player.getName().getString())
-                        .reduce("", (a, b) -> a + "\n• " + b);
+                    .map(player -> {
+                        String name = player.getName().getString();
+                        return "• " + name + (name.startsWith(".") ? " [BEDROCK] (loser)" : "");
+                    })
+                    .reduce("", (a, b) -> a + "\n" + b);
 
                 event.reply("Players Online: " + count + "\n" + (count > 0 ? players : "No players online.")).queue();
 
@@ -138,7 +144,17 @@ public class DiscordListener extends ListenerAdapter {
         }
 
         DiscordBridgeMC.SERVER.execute(() -> {
-            Component mcMessage = Component.literal("[Discord] " + event.getAuthor().getName() + ": " + discordMessage);
+            MutableComponent mcMessage = Component.empty()
+                    .append(Component.literal("[DISCORD]")
+                        .withStyle(Style.EMPTY
+                            .withBold(true)
+                            .withColor(TextColor.fromRgb(0x5865F2))
+                        )
+                    )
+                    .append(Component.literal(" "))
+                    .append(Component.literal(event.getAuthor().getName()))
+                    .append(Component.literal(": "))
+                    .append(Component.literal(discordMessage.toString()));
 
             DiscordBridgeMC.SERVER.getPlayerList().broadcastSystemMessage(mcMessage, false);
         });

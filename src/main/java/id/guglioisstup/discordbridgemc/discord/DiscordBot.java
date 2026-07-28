@@ -3,7 +3,6 @@ package id.guglioisstup.discordbridgemc.discord;
 import id.guglioisstup.discordbridgemc.DiscordBridgeMC;
 import id.guglioisstup.discordbridgemc.config.Config;
 import id.guglioisstup.discordbridgemc.config.ConfigManager;
-import id.guglioisstup.discordbridgemc.discord.SlashCommands;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -40,8 +39,8 @@ public final class DiscordBot {
             SlashCommands.register(jda);
 
             DiscordBridgeMC.LOGGER.info(
-                    "Logged into Discord as {}",
-                    jda.getSelfUser().getAsTag()
+                "Logged into Discord as {}",
+                jda.getSelfUser().getAsTag()
             );
 
         } catch (Exception e) {
@@ -81,24 +80,22 @@ public final class DiscordBot {
 
         Config config = ConfigManager.get();
 
-        TextChannel channel = jda.getTextChannelById(
-                config.discord.channelId
-        );
+        TextChannel channel = jda.getTextChannelById(config.discord.channelId);
 
         if (channel == null) {
             DiscordBridgeMC.LOGGER.warn(
-                    "Discord channel not found: {}",
-                    config.discord.channelId
+                "Discord channel not found: {}",
+                config.discord.channelId
             );
             return;
         }
 
         channel.sendMessage(message).queue(
-                null,
-                error -> DiscordBridgeMC.LOGGER.error(
-                        "Failed to send Discord message",
-                        error
-                )
+            null,
+            error -> DiscordBridgeMC.LOGGER.error(
+                "Failed to send Discord message",
+                error
+            )
         );
     }
 

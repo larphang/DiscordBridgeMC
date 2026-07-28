@@ -1,7 +1,6 @@
 package id.guglioisstup.discordbridgemc.monitor;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.server.MinecraftServer;
 
 public class TpsMonitor {
 
@@ -11,12 +10,8 @@ public class TpsMonitor {
     private static double tps = 20.0;
     private static double mspt = 50.0;
 
-    private static MinecraftServer server;
-
     public static void register() { // i couldnt get the actual tick function to get the right value ??
         ServerTickEvents.END_SERVER_TICK.register(serverInstance -> {
-            server = serverInstance;
-
             ticks++;
 
             long now = System.currentTimeMillis();
