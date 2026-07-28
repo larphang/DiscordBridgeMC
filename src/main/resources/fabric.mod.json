@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "discordbridgemc",
+	"version": "${version}",
+	"name": "DiscordBridgeMC",
+	"description": "A discord mod that implements a bot into the server ran ON the server.",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/discordbridgemc/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"id.guglioisstup.discordbridgemc.DiscordBridgeMC"
+		],
+		"client": [
+			"id.guglioisstup.discordbridgemc.client.DiscordBridgeMCClient"
+		]
+	},
+	"mixins": [
+		"discordbridgemc.mixins.json",
+		{
+			"config": "discordbridgemc.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
