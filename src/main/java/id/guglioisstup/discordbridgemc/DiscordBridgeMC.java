@@ -1,53 +1,80 @@
 package id.guglioisstup.discordbridgemc;
 
+import id.guglioisstup.discordbridgemc.commands.LinkCommand;
+import id.guglioisstup.discordbridgemc.commands.UnlinkCommand;
 import id.guglioisstup.discordbridgemc.config.ConfigManager;
+import id.guglioisstup.discordbridgemc.database.DatabaseManager;
 import id.guglioisstup.discordbridgemc.discord.DiscordBot;
 import id.guglioisstup.discordbridgemc.discord.DiscordStatusUpdater;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.MinecraftServer;
-import id.guglioisstup.discordbridgemc.events.ChatEvents;
 import id.guglioisstup.discordbridgemc.events.BroadcastEvents;
+import id.guglioisstup.discordbridgemc.events.ChatEvents;
+import id.guglioisstup.discordbridgemc.events.PlayerEvents;
+import id.guglioisstup.discordbridgemc.events.StatsEvents;
 import id.guglioisstup.discordbridgemc.monitor.TpsMonitor;
 import id.guglioisstup.discordbridgemc.monitor.UptimeMonitor;
+
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class DiscordBridgeMC implements ModInitializer {
     public static final String MOD_ID = "discordbridgemc";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static MinecraftServer SERVER;
+    public static MinecraftServer SERVER;
 
     @Override
-	public void onInitialize() {
-		LOGGER.info("Initializing DiscordBridgeMC...");
+    public void onInitialize() {
+        LOGGER.info("Initializing DiscordBridgeMC...");
 
-		ConfigManager.load();
+        ConfigManager.load();
 
-		ChatEvents.register();
-		BroadcastEvents.register();
-		TpsMonitor.register();
+        DatabaseManager.initialize();
 
-		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-			SERVER = server;
+        ChatEvents.register();
+        BroadcastEvents.register();
+        PlayerEvents.register();
+        StatsEvents.register();
 
-			LOGGER.info("Minecraft server started.");
+        TpsMonitor.register();
 
-			UptimeMonitor.start();
-			DiscordBot.start();
-			DiscordStatusUpdater.start();
-		});
+        CommandRegistrationCallback.EVENT.register(
+			(dispatcher, registryAccess, environment) -> {
+				LinkCommand.register(dispatcher);
+				UnlinkCommand.register(dispatcher);
+			}
+		);
+		
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            SERVER = server;
 
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-			LOGGER.info("Stopping Discord bot...");
+            LOGGER.info("Minecraft server started.");
 
-			DiscordBot.shutdown();
-		});
+            UptimeMonitor.start();
+            DiscordBot.start();
 
-		LOGGER.info("DiscordBridgeMC initialized.");
-	}
+            DiscordStatusUpdater.start();
+        });
+
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            LOGGER.info("Stopping DiscordBridgeMC...");
+
+            DiscordBot.shutdown();
+            DatabaseManager.close();
+
+            SERVER = null;
+        });
+
+        LOGGER.info("DiscordBridgeMC initialized.");
+    }
+
 
     public static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);

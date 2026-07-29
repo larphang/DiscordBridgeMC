@@ -3,6 +3,7 @@ package id.guglioisstup.discordbridgemc.discord;
 import id.guglioisstup.discordbridgemc.DiscordBridgeMC;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 public final class SlashCommands {
     private SlashCommands() {
@@ -21,7 +22,28 @@ public final class SlashCommands {
                 Commands.slash("gc", "Requests a garbage collection"),
                 Commands.slash("chunks", "Shows loaded chunk count"),
                 Commands.slash("seed", "Shows world seed"),
-                Commands.slash("reload", "Reloads the mod configuration")
+                Commands.slash("reload", "Reloads the mod configuration"),
+                Commands.slash("playtime", "Shows player playtime")
+                    .addOption(
+                        OptionType.STRING,
+                        "player", "Player name",
+                        false
+                    ),
+                Commands.slash("lastseen", "Shows when a player was last online")
+                .addOption(
+                    OptionType.STRING,
+                    "player",
+                    "Player name",
+                    true
+                ),
+                Commands.slash("top", "Shows server statistics rankings")
+                    .addOption(
+                        OptionType.STRING,
+                        "category",
+                        "Statistic category",
+                        true
+                    ),
+                Commands.slash("unlink", "Unlinks your Discord account")
             )
             .queue(
                 success -> DiscordBridgeMC.LOGGER.info("Slash commands registered."),
