@@ -17,7 +17,7 @@ public final class BroadcastEvents {
 
             String eventMessage = message.getString();
 
-            if (eventMessage.startsWith("[Discord]")) {
+            if (eventMessage.startsWith("[DISCORD]")) {
                 return;
             }
 
