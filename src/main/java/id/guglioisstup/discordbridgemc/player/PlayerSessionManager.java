@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import id.guglioisstup.discordbridgemc.database.dao.PlayerDao;
+
 public final class PlayerSessionManager {
     private static final Map<UUID, Long> sessions = new ConcurrentHashMap<>();
 
@@ -28,5 +30,20 @@ public final class PlayerSessionManager {
         }
 
         return (System.currentTimeMillis() - start) / 1000;
+    }
+
+    public static long getCurrentPlaytime(UUID uuid) {
+        long stored = PlayerDao.getPlaytime(uuid);
+
+        long sessionStart = PlayerDao.getSessionStart(uuid);
+
+        if (sessionStart > 0) {
+            long currentSession =
+                (System.currentTimeMillis() - sessionStart) / 1000;
+
+            return stored + currentSession;
+        }
+
+        return stored;
     }
 }

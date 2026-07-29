@@ -4,6 +4,7 @@ import id.guglioisstup.discordbridgemc.DiscordBridgeMC;
 import id.guglioisstup.discordbridgemc.monitor.SystemMonitor;
 import id.guglioisstup.discordbridgemc.monitor.TpsMonitor;
 import id.guglioisstup.discordbridgemc.monitor.UptimeMonitor;
+import id.guglioisstup.discordbridgemc.player.PlayerSessionManager;
 import id.guglioisstup.discordbridgemc.config.ConfigManager;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -48,7 +49,7 @@ public class DiscordListener extends ListenerAdapter {
                 event.reply("Players Online: " + count + "\n" + (count > 0 ? players : "No players online.")).queue();
 
                 break;
-           case "playtime":
+            case "playtime":
                 PlayerData player;
 
                 if (event.getOption("player") != null) {
@@ -67,10 +68,12 @@ public class DiscordListener extends ListenerAdapter {
                     break;
                 }
 
+                long playtime = PlayerSessionManager.getCurrentPlaytime(player.getUuid());
+
                 event.reply(
                     player.getUsername()
                     + "'s playtime: "
-                    + TimeFormatter.format(player.getPlaytime())
+                    + TimeFormatter.format(playtime)
                 ).queue();
 
                 break;
@@ -129,20 +132,19 @@ public class DiscordListener extends ListenerAdapter {
 
                 StringBuilder message = new StringBuilder();
 
-                message.append("Top ")
-                    .append(category.display)
-                    .append("\n\n");
+                message.append("Top ").append(category.display).append("\n\n");
 
                 int rank = 1;
 
                 for(PlayerData p : players2) {
-                    long value = switch(category) {
-                        case PLAYTIME -> p.getPlaytime();
-                        case PLAYER_KILLS -> p.getPlayerKills();
-                        case MOB_KILLS -> p.getMobKills();
-                        case DEATHS -> p.getDeaths();
-                        case BLOCKS_BROKEN -> p.getBlocksBroken();
-                        case BLOCKS_PLACED -> p.getBlocksPlaced();
+                    String value = switch(category) {
+                        case PLAYTIME -> TimeFormatter.format(PlayerSessionManager.getCurrentPlaytime(p.getUuid()));
+
+                        case PLAYER_KILLS -> String.valueOf(p.getPlayerKills());
+                        case MOB_KILLS -> String.valueOf(p.getMobKills());
+                        case DEATHS -> String.valueOf(p.getDeaths());
+                        case BLOCKS_BROKEN -> String.valueOf(p.getBlocksBroken());
+                        case BLOCKS_PLACED -> String.valueOf(p.getBlocksPlaced());
                     };
 
                     message.append(rank++)
@@ -154,6 +156,34 @@ public class DiscordListener extends ListenerAdapter {
                 }
 
                 event.reply(message.toString()).queue();
+
+                break;
+            case "stats":
+                PlayerData player2;
+
+                if (event.getOption("player") != null) {
+                    String username = event.getOption("player").getAsString();
+                    player2 = PlayerDao.getByUsername(username);
+                } else {
+                    player2 = PlayerDao.getByDiscord(event.getUser().getId());
+                }
+
+                if (player2 == null) {
+                    event.reply("Player not found. Make sure your Discord account is linked.").queue();
+                    break;
+                }
+
+                long playtime2 = PlayerSessionManager.getCurrentPlaytime(player2.getUuid());
+
+                String stats = "**" + player2.getUsername() + "'s Stats**\n\n" +
+                        "Playtime: " + TimeFormatter.format(playtime2) + "\n" +
+                        "Player Kills: " + player2.getPlayerKills() + "\n" +
+                        "Deaths: " + player2.getDeaths() + "\n" +
+                        "Mob Kills: " + player2.getMobKills() + "\n" +
+                        "Blocks Broken: " + player2.getBlocksBroken() + "\n" +
+                        "Blocks Placed: " + player2.getBlocksPlaced();
+
+                event.reply(stats).queue();
 
                 break;
             case "unlink":

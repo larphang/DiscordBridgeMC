@@ -333,6 +333,27 @@ public final class PlayerDao {
         }
     }
 
+    public static long getPlaytime(UUID uuid) {
+        try (Connection conn = Database.connection();
+            PreparedStatement stmt = conn.prepareStatement(
+                "SELECT playtime FROM players WHERE uuid = ?"
+            )) {
+
+            stmt.setString(1, uuid.toString());
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getLong("playtime");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
     private static PlayerData readPlayer(ResultSet rs) throws SQLException {
         UUID uuid = UUID.fromString(
             rs.getString("uuid")

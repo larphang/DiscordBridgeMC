@@ -29,6 +29,13 @@ public final class SlashCommands {
                         "player", "Player name",
                         false
                     ),
+                Commands.slash("stats", "Shows player statistics")
+                    .addOption(
+                        OptionType.STRING,
+                        "player",
+                        "Player name",
+                        false
+                    ),
                 Commands.slash("lastseen", "Shows when a player was last online")
                 .addOption(
                     OptionType.STRING,
