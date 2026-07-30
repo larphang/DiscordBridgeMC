@@ -294,8 +294,8 @@ public final class PlayerDao {
         }
     }
 
-    public static void updateSessionStart(UUID uuid) {
-        updateLong(uuid, "session_start", System.currentTimeMillis());
+    public static void updateSessionStart(UUID uuid, long time) {
+        updateLong(uuid, "session_start", time);
     }
 
     public static long getSessionStart(UUID uuid) {

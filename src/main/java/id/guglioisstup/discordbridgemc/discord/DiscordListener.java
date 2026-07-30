@@ -19,6 +19,8 @@ import net.minecraft.network.chat.TextColor;
 import net.dv8tion.jda.api.Permission;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+
+import java.util.Comparator;
 import java.util.List;
 
 public class DiscordListener extends ListenerAdapter {
@@ -108,12 +110,12 @@ public class DiscordListener extends ListenerAdapter {
 
                 break;
             case "top":
-                String categoryName =event.getOption("category").getAsString().toUpperCase();
+                String categoryName = event.getOption("category").getAsString().toUpperCase();
 
                 TopCategory category;
                 try {
                     category = TopCategory.valueOf(categoryName);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     event.reply(
                         "Invalid category.\n" +
                         "Available:\n" +
@@ -122,23 +124,39 @@ public class DiscordListener extends ListenerAdapter {
                         "`mob_kills`\n" +
                         "`deaths`\n" +
                         "`blocks_broken`\n" +
-                        "`blocks_placed`\n" 
+                        "`blocks_placed`\n"
                     ).queue();
-
                     break;
                 }
 
-                List<PlayerData> players2 = PlayerDao.getTop(category, 10);
+                List<PlayerData> players2;
+
+                if (category == TopCategory.PLAYTIME) {
+                    players2 = PlayerDao.getAll();
+
+                    players2.sort(
+                        Comparator.comparingLong((PlayerData p) ->
+                            PlayerSessionManager.getCurrentPlaytime(p.getUuid())
+                        ).reversed()
+                    );
+
+                    if (players2.size() > 10) {
+                        players2 = players2.subList(0, 10);
+                    }
+                } else {
+                    players2 = PlayerDao.getTop(category, 10);
+                }
 
                 StringBuilder message = new StringBuilder();
-
                 message.append("Top ").append(category.display).append("\n\n");
 
                 int rank = 1;
 
-                for(PlayerData p : players2) {
-                    String value = switch(category) {
-                        case PLAYTIME -> TimeFormatter.format(PlayerSessionManager.getCurrentPlaytime(p.getUuid()));
+                for (PlayerData p : players2) {
+                    String value = switch (category) {
+                        case PLAYTIME -> TimeFormatter.format(
+                            PlayerSessionManager.getCurrentPlaytime(p.getUuid())
+                        );
 
                         case PLAYER_KILLS -> String.valueOf(p.getPlayerKills());
                         case MOB_KILLS -> String.valueOf(p.getMobKills());
@@ -156,7 +174,6 @@ public class DiscordListener extends ListenerAdapter {
                 }
 
                 event.reply(message.toString()).queue();
-
                 break;
             case "stats":
                 PlayerData player2;

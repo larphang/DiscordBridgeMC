@@ -33,7 +33,8 @@ public final class PlayerEvents {
             PlayerSessionManager.startSession(player);
 
             PlayerDao.updateSessionStart(
-                player.getUUID()
+                player.getUUID(),
+                System.currentTimeMillis()
             );
 
             if (firstJoin) {
@@ -49,19 +50,13 @@ public final class PlayerEvents {
             if (sessionStart > 0) {
                 long seconds = (System.currentTimeMillis() - sessionStart) / 1000;
 
-                PlayerDao.addPlaytime(
-                    player.getUUID(),
-                    seconds
-                );
+                PlayerDao.addPlaytime(player.getUUID(), seconds);
+                PlayerDao.updateSessionStart(player.getUUID(), 0);
             }
 
-            PlayerDao.updateLastSeen(
-                player.getUUID()
-            );
+            PlayerDao.updateLastSeen(player.getUUID());
 
-            PlayerSessionManager.endSession(
-                player.getUUID()
-            );
+            PlayerSessionManager.endSession(player.getUUID());
         });
     }
 }
